@@ -35,7 +35,12 @@ import plugily.projects.minigamesbox.classic.arena.PluginArenaUtils;
 import plugily.projects.minigamesbox.classic.arena.managers.BungeeManager;
 import plugily.projects.minigamesbox.classic.arena.options.ArenaOptionManager;
 import plugily.projects.minigamesbox.classic.commands.arguments.PluginArgumentsRegistry;
-import plugily.projects.minigamesbox.classic.events.*;
+import plugily.projects.minigamesbox.classic.events.ChatEvents;
+import plugily.projects.minigamesbox.classic.events.CycleEvents;
+import plugily.projects.minigamesbox.classic.events.Events;
+import plugily.projects.minigamesbox.classic.events.JoinEvent;
+import plugily.projects.minigamesbox.classic.events.LobbyEvents;
+import plugily.projects.minigamesbox.classic.events.QuitEvent;
 import plugily.projects.minigamesbox.classic.events.bungee.BungeeEvents;
 import plugily.projects.minigamesbox.classic.events.spectator.SpectatorEvents;
 import plugily.projects.minigamesbox.classic.events.spectator.SpectatorItemsManager;
@@ -66,7 +71,6 @@ import plugily.projects.minigamesbox.classic.user.UserManager;
 import plugily.projects.minigamesbox.classic.utils.actionbar.ActionBarManager;
 import plugily.projects.minigamesbox.classic.utils.configuration.ConfigUtils;
 import plugily.projects.minigamesbox.classic.utils.dimensional.CuboidSelector;
-import plugily.projects.minigamesbox.classic.utils.engine.JavaScriptEngine;
 import plugily.projects.minigamesbox.classic.utils.helper.BukkitHelper;
 import plugily.projects.minigamesbox.classic.utils.hologram.HologramManager;
 import plugily.projects.minigamesbox.classic.utils.items.ItemManager;
@@ -79,7 +83,6 @@ import plugily.projects.minigamesbox.classic.utils.services.exception.ExceptionL
 import plugily.projects.minigamesbox.classic.utils.services.locale.Locale;
 import plugily.projects.minigamesbox.classic.utils.services.locale.LocaleRegistry;
 import plugily.projects.minigamesbox.classic.utils.services.metrics.Metrics;
-import plugily.projects.minigamesbox.classic.utils.version.ServerVersion;
 import plugily.projects.minigamesbox.classic.utils.version.events.EventsInitializer;
 import plugily.projects.minigamesbox.inventory.boot.InventoryManager;
 
@@ -108,7 +111,6 @@ public class PluginMain extends JavaPlugin {
   private StatsStorage statsStorage;
   private BukkitHelper bukkitHelper;
 
-  private JavaScriptEngine javaScriptEngine;
   private CuboidSelector cuboidSelector;
   private SpecialItemManager specialItemManager;
   private RewardsFactory rewardsHandler;
@@ -160,12 +162,12 @@ public class PluginMain extends JavaPlugin {
     messageUtils = new MessageUtils(this);
 
     //checking startup
-    if(!validateIfPluginShouldStart()) {
+    if (!validateIfPluginShouldStart()) {
       return;
     }
 
     debugger.debug("[System] [Core] Initialization start");
-    if(getDescription().getVersion().contains("-debug") || getConfig().getBoolean("Developer-Mode")) {
+    if (getDescription().getVersion().contains("-debug") || getConfig().getBoolean("Developer-Mode")) {
       debugger.deepDebug(true);
       debugger.debug(Level.FINE, "Deep debug enabled");
       getConfig().getStringList("Performance-Listenable").forEach(debugger::monitorPerformance);
@@ -175,7 +177,7 @@ public class PluginMain extends JavaPlugin {
     setupFiles();
     LocaleRegistry.registerLocale(new Locale("Default", "Default", "default", "Internal Plugin", Arrays.asList("default")));
 
-    if(!ServiceRegistry.registerService(this)) {
+    if (!ServiceRegistry.registerService(this)) {
       debugger.sendConsoleMsg(pluginMessagePrefix + "&cSadly, we can't connect to Plugily Projects Services. Some functions may won't work. e.g. Translations, Automatic Error Report");
     }
 
@@ -183,7 +185,7 @@ public class PluginMain extends JavaPlugin {
 
 
     File file = new File(getDataFolder(), "internal/data.yml");
-    if(file.delete()) {
+    if (file.delete()) {
       saveDefaultFile("internal/data");
     } else {
       new File(getDataFolder().getName() + "/internal").mkdir();
@@ -228,7 +230,6 @@ public class PluginMain extends JavaPlugin {
     languageConfig = ConfigUtils.getConfig(this, "language");
     actionBarManager = new ActionBarManager(this);
     bukkitHelper = new BukkitHelper(this);
-    javaScriptEngine = new JavaScriptEngine(this);
     partyHandler = new PartySupportInitializer().initialize(this);
     kitRegistry = new KitRegistry(this);
     User.init(this);
@@ -248,7 +249,7 @@ public class PluginMain extends JavaPlugin {
     holidayManager = new HolidayManager(this);
 
     permissionsManager = new PermissionsManager(this);
-    if(configPreferences.getOption("BUNGEEMODE")) {
+    if (configPreferences.getOption("BUNGEEMODE")) {
       debugger.debug("Bungee enabled");
       bungeeManager = new BungeeManager(this);
       new BungeeEvents(this);
@@ -269,8 +270,8 @@ public class PluginMain extends JavaPlugin {
 
     PluginArenaUtils.init(this);
     PluginArena.init(this);
-    if(configPreferences.getOption("LEADERBOARDS")) {
-      if(!new File(getDataFolder(), "internal/leaderboards_data.yml").exists()) {
+    if (configPreferences.getOption("LEADERBOARDS")) {
+      if (!new File(getDataFolder(), "internal/leaderboards_data.yml").exists()) {
         new File(getDataFolder() + "/internal").mkdir();
       }
       //running later due to plugin specific stats
@@ -282,7 +283,7 @@ public class PluginMain extends JavaPlugin {
   private boolean validateIfPluginShouldStart() {
     try {
       Class.forName("org.spigotmc.SpigotConfig");
-    } catch(Exception e) {
+    } catch (Exception e) {
       MiscUtils.sendLineBreaker(getName());
       messageUtils.thisVersionIsNotSupported();
       debugger.sendConsoleMsg(pluginMessagePrefix + "&cYour server software is not supported by " + getDescription().getName() + "!");
@@ -315,7 +316,7 @@ public class PluginMain extends JavaPlugin {
 
   //some plugins need to register files such as "kits"
   public void addFileName(String filename) {
-    if(getFileNames().contains(filename)) {
+    if (getFileNames().contains(filename)) {
       throw new IllegalStateException("Filename " + filename + " already on the list!");
     }
     getFileNames().add(filename);
@@ -323,30 +324,30 @@ public class PluginMain extends JavaPlugin {
   }
 
   public void setupFiles() {
-    for(String fileName : fileNames) {
+    for (String fileName : fileNames) {
       saveDefaultFile(fileName);
     }
   }
 
   private void saveDefaultFile(String fileName) {
-    if(!new File(getDataFolder(), fileName + ".yml").exists()) {
+    if (!new File(getDataFolder(), fileName + ".yml").exists()) {
       saveResource(fileName + ".yml", false);
     }
   }
 
   private void checkUpdate(int pluginUpdateId) {
-    if(!getConfig().getBoolean("Update-Notifier.Enabled", true)) {
+    if (!getConfig().getBoolean("Update-Notifier.Enabled", true)) {
       return;
     }
     UpdateChecker.init(this, pluginUpdateId).requestUpdateCheck().whenComplete((result, exception) -> {
-      if(!result.requiresUpdate()) {
+      if (!result.requiresUpdate()) {
         return;
       }
-      if(result.getNewestVersion().contains("b")) {
-        if(getConfig().getBoolean("Update-Notifier.Notify-Beta-Versions", true)) {
+      if (result.getNewestVersion().contains("b")) {
+        if (getConfig().getBoolean("Update-Notifier.Notify-Beta-Versions", true)) {
           debugger.sendConsoleMsg(pluginMessagePrefix + "Your software is ready for update! However it's a BETA VERSION. Proceed with caution.");
           debugger.sendConsoleMsg(pluginMessagePrefix + "Current version %old%, latest version %new%".replace("%old%", getDescription().getVersion()).replace("%new%",
-              result.getNewestVersion()));
+            result.getNewestVersion()));
         }
         return;
       }
@@ -361,12 +362,12 @@ public class PluginMain extends JavaPlugin {
     metrics = new Metrics(this, pluginMetricsId);
 
     metrics.addCustomChart(new Metrics.SimplePie("database_enabled", () -> String.valueOf(configPreferences
-        .getOption("DATABASE"))));
+      .getOption("DATABASE"))));
     metrics.addCustomChart(new Metrics.SimplePie("locale_used", () -> languageManager.getPluginLocale().getPrefix()));
     metrics.addCustomChart(new Metrics.SimplePie("bungeecord_hooked", () -> String.valueOf(configPreferences.getOption("BUNGEEMODE"))) {
     });
     metrics.addCustomChart(new Metrics.SimplePie("update_notifier", () -> {
-      if(getConfig().getBoolean("Update-Notifier.Enabled", true)) {
+      if (getConfig().getBoolean("Update-Notifier.Enabled", true)) {
         return getConfig().getBoolean("Update-Notifier.Notify-Beta-Versions", true) ? "Enabled with beta notifier" : "Enabled";
       }
 
@@ -377,29 +378,29 @@ public class PluginMain extends JavaPlugin {
 
   @Override
   public void onDisable() {
-    if(forceDisable) {
+    if (forceDisable) {
       return;
     }
     getDebugger().debug("System disable initialized");
     long start = System.currentTimeMillis();
 
     Bukkit.getLogger().removeHandler(getExceptionLogHandler());
-    if(getArenaRegistry() != null) {
-      for(PluginArena arena : getArenaRegistry().getArenas()) {
-        for(Player player : new ArrayList<>(arena.getPlayers())) {
+    if (getArenaRegistry() != null) {
+      for (PluginArena arena : getArenaRegistry().getArenas()) {
+        for (Player player : new ArrayList<>(arena.getPlayers())) {
           getArenaManager().leaveAttempt(player, arena);
         }
         arena.getMapRestorerManager().fullyRestoreArena();
       }
     }
-    if(getUserManager() != null) {
+    if (getUserManager() != null) {
       getUserManager().getDatabase().disable();
     }
-    if(getConfigPreferences() != null && getLeaderboardRegistry() != null && getConfigPreferences().getOption("LEADERBOARDS")) {
+    if (getConfigPreferences() != null && getLeaderboardRegistry() != null && getConfigPreferences().getOption("LEADERBOARDS")) {
       getLeaderboardRegistry().disableHolograms();
     }
-    if(getHologramManager() != null) {
-      for(ArmorStand armorStand : getHologramManager().getArmorStands()) {
+    if (getHologramManager() != null) {
+      for (ArmorStand armorStand : getHologramManager().getArmorStands()) {
         armorStand.remove();
         armorStand.setCustomNameVisible(false);
       }
@@ -443,10 +444,6 @@ public class PluginMain extends JavaPlugin {
 
   public BukkitHelper getBukkitHelper() {
     return bukkitHelper;
-  }
-
-  public JavaScriptEngine getJavaScriptEngine() {
-    return javaScriptEngine;
   }
 
   public SpecialItemManager getSpecialItemManager() {

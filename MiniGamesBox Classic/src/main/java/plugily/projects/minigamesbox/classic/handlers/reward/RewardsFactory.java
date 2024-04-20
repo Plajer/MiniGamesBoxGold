@@ -26,7 +26,6 @@ import plugily.projects.minigamesbox.classic.PluginMain;
 import plugily.projects.minigamesbox.classic.arena.PluginArena;
 import plugily.projects.minigamesbox.classic.handlers.language.MessageBuilder;
 import plugily.projects.minigamesbox.classic.utils.configuration.ConfigUtils;
-import plugily.projects.minigamesbox.classic.utils.engine.ScriptEngineHandler;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -181,16 +180,6 @@ public class RewardsFactory {
         }
         break;
       case SCRIPT:
-        ScriptEngineHandler engine = new ScriptEngineHandler(plugin);
-        if(player != null) {
-          engine.setValue("player", player);
-        }
-        engine.setValue("server", Bukkit.getServer());
-        if(arena != null) {
-          engine.setValue("arena", arena);
-        }
-        engine.setValue("plugin", plugin);
-        engine.execute(command);
         break;
       default:
         break;
