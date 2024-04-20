@@ -17,28 +17,26 @@
  */
 
 plugins {
-    id("plugily.projects.java-conventions")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    java
-}
-
-repositories {
-    maven("https://jitpack.io")
-}
-
-dependencies {
-    implementation("fr.mrmicky:FastInv:3.0.3")
+    id 'plugily.projects.java-conventions'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'java'
 }
 
 tasks {
     build {
-        dependsOn(shadowJar)
+        dependsOn shadowJar
+    }
+
+    compileJava {
+        options.encoding = "UTF-8"
+        targetCompatibility = JavaVersion.VERSION_17.toString()
+        sourceCompatibility = JavaVersion.VERSION_17.toString()
     }
 
     shadowJar {
         archiveClassifier.set("")
-        relocate("fr.mrmicky.fastinv", "plugily.projects.minigamesbox.inventory.utils.fastinv")
     }
 }
 
-description = "MiniGamesBox-Inventory"
+description = "MiniGamesBox-Utils"
+

@@ -18,7 +18,7 @@
 
 package plugily.projects.minigamesbox.classic.commands.arguments.game;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.command.CommandSender;
 import plugily.projects.minigamesbox.classic.api.StatisticType;
 import plugily.projects.minigamesbox.classic.commands.arguments.PluginArgumentsRegistry;

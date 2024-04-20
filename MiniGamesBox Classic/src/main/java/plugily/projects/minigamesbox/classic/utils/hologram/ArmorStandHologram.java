@@ -217,6 +217,7 @@ public class ArmorStandHologram {
     ArmorStand stand = (ArmorStand) world.spawnEntity(loc, EntityType.ARMOR_STAND);
     stand.setVisible(false);
     stand.setGravity(false);
+    stand.setInvulnerable(true);
     stand.setCustomNameVisible(true);
     return stand;
   }

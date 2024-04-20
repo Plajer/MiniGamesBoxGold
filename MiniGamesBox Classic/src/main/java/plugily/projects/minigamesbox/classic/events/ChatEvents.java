@@ -18,7 +18,7 @@
 
 package plugily.projects.minigamesbox.classic.events;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -89,7 +89,7 @@ public class ChatEvents implements Listener {
         formatted = StringUtils.replace(formatted, "%kit%", user.getKit().getName());
       }
     }
-    formatted = StringUtils.replace(formatted, "%player%", "%1$s");
+    formatted = StringUtils.replace(formatted, "%player%", user.getPlayer().getDisplayName());
     formatted = StringUtils.replace(formatted, "%message%", "%2$s");
     formatted = new MessageBuilder(formatted).arena(arena).player(user.getPlayer()).build();
     // notice - unresolved % could throw UnknownFormatException

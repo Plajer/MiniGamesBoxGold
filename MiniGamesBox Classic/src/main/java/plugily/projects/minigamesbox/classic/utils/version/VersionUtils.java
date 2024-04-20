@@ -1,19 +1,20 @@
 /*
- *  MiniGamesBox - Library box with massive content that could be seen as minigames core.
- *  Copyright (C) 2023 Plugily Projects - maintained by Tigerpanzer_02 and contributors
+ * MiniGamesBox - Library box with massive content that could be seen as minigames core.
+ * Copyright (C)  2021  Plugily Projects - maintained by Tigerpanzer_02 and contributors
  *
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
 
 package plugily.projects.minigamesbox.classic.utils.version;
@@ -271,6 +272,7 @@ public final class VersionUtils {
 
   // Some particle in new versions needs their own data type
   // See https://www.spigotmc.org/threads/343001/
+  @SuppressWarnings("removal")
   private static Object getParticleDataType(Particle particle, Location location) {
     if(ServerVersion.Version.isCurrentEqualOrHigher(ServerVersion.Version.v1_13_R2) && particle == Particle.REDSTONE) {
       return new Particle.DustOptions(Color.RED, 2);
@@ -306,19 +308,19 @@ public final class VersionUtils {
         if(dustTransition == null) {
           dustTransition = new org.bukkit.Particle.DustTransition(Color.fromRGB(255, 0, 0), Color.fromRGB(255, 255, 255), 1.0F);
         }
+
         return dustTransition;
       }
-      /*
-      try {
-        if(particle == Particle.VIBRATION) {
-          if(isPaper) {
-            return new org.bukkit.Vibration(new org.bukkit.Vibration.Destination.BlockDestination(location), 40);
-          }
-          return new org.bukkit.Vibration(location, new org.bukkit.Vibration.Destination.BlockDestination(location), 40);
+
+      if(particle == Particle.VIBRATION) {
+        if(isPaper) {
+          return new org.bukkit.Vibration(new org.bukkit.Vibration.Destination.BlockDestination(location), 40);
         }
-      } catch(NoClassDefFoundError ignored) {
-      }*/
+
+        return new org.bukkit.Vibration(location, new org.bukkit.Vibration.Destination.BlockDestination(location), 40);
+      }
     }
+
     return null;
   }
 

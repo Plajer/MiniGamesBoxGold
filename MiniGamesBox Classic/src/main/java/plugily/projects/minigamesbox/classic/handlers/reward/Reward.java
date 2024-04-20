@@ -18,7 +18,7 @@
 
 package plugily.projects.minigamesbox.classic.handlers.reward;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 
 import java.util.logging.Level;

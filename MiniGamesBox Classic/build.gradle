@@ -17,30 +17,48 @@
  */
 
 plugins {
-    id("plugily.projects.java-conventions")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    java
+    id 'plugily.projects.java-conventions'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://libraries.minecraft.net'
+    }
 }
 
 dependencies {
-    implementation("me.tigerhix.lib:scoreboard:1.4.0") { isTransitive = false }
-    implementation("com.github.cryptomorin:XSeries:9.4.0") { isTransitive = false }
-    implementation(project(":MiniGamesBox-Inventory", "shadow"))
-    implementation(project(":MiniGamesBox-Database", "shadow"))
-    implementation(project(":MiniGamesBox-Utils", "shadow"))
-    implementation("com.google.code.gson:gson:2.10.1")
-    implementation("io.papermc:paperlib:1.0.8")
-    compileOnly("com.mojang:authlib:3.11.50")
-    compileOnly("de.simonsator:DevelopmentPAFSpigot:1.0.67")
-    compileOnly("de.simonsator:Party-and-Friends-MySQL-Edition-Spigot-API:1.5.4-RELEASE")
-    compileOnly("de.simonsator:Spigot-Party-API-For-RedisBungee:1.0.3-SNAPSHOT")
-    compileOnly("com.alessiodp.parties:parties-api:3.2.9")
-    compileOnly("me.clip:placeholderapi:2.11.3")
+    implementation('me.tigerhix.lib:scoreboard:1.4.3') {
+        transitive = false
+    }
+    implementation('com.github.cryptomorin:XSeries:9.4.0') {
+        transitive = false
+    }
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    implementation(project(path: ":MiniGamesBox-Inventory", configuration: 'shadow'))
+    implementation(project(path: ":MiniGamesBox-Database", configuration: 'shadow'))
+    implementation(project(path: ":MiniGamesBox-Utils", configuration: 'shadow'))
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'io.papermc:paperlib:1.0.8'
+    compileOnly 'com.mojang:authlib:3.11.50'
+    compileOnly 'de.simonsator:DevelopmentPAFSpigot:1.0.67'
+    compileOnly 'de.simonsator:Party-and-Friends-MySQL-Edition-Spigot-API:1.5.4-RELEASE'
+    compileOnly 'de.simonsator:Spigot-Party-API-For-RedisBungee:1.0.3-SNAPSHOT'
+    compileOnly 'com.alessiodp.parties:parties-api:3.2.9'
+    compileOnly 'me.clip:placeholderapi:2.11.3'
 }
 
 tasks {
     build {
-        dependsOn(shadowJar)
+        dependsOn shadowJar
+    }
+
+    compileJava {
+        options.encoding = "UTF-8"
+        targetCompatibility = JavaVersion.VERSION_17.toString()
+        sourceCompatibility = JavaVersion.VERSION_17.toString()
     }
 
     shadowJar {

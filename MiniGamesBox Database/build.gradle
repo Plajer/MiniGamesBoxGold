@@ -17,12 +17,30 @@
  */
 
 plugins {
-    // Support convention plugins written in Groovy. Convention plugins are build scripts in 'src/main' that automatically become available as plugins in the main build.
-    id("groovy-gradle-plugin")
+    id 'plugily.projects.java-conventions'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'java'
 }
 
-repositories {
-    // Use the plugin portal to apply community plugins in convention plugins.
-    gradlePluginPortal()
+dependencies {
+    implementation 'com.zaxxer:HikariCP:5.0.1'
 }
+
+tasks {
+    build {
+        dependsOn shadowJar
+    }
+
+    compileJava {
+        options.encoding = "UTF-8"
+        targetCompatibility = JavaVersion.VERSION_17.toString()
+        sourceCompatibility = JavaVersion.VERSION_17.toString()
+    }
+
+    shadowJar {
+        archiveClassifier.set("")
+    }
+}
+
+description = "MiniGamesBox-Database"
 

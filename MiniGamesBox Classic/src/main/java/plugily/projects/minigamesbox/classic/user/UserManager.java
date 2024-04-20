@@ -25,7 +25,6 @@ import plugily.projects.minigamesbox.classic.api.StatisticType;
 import plugily.projects.minigamesbox.classic.arena.PluginArena;
 import plugily.projects.minigamesbox.classic.handlers.language.MessageBuilder;
 import plugily.projects.minigamesbox.classic.user.data.FileStats;
-import plugily.projects.minigamesbox.classic.user.data.MysqlManager;
 import plugily.projects.minigamesbox.classic.user.data.UserDatabase;
 
 import java.util.ArrayList;
@@ -44,11 +43,7 @@ public class UserManager {
 
   public UserManager(PluginMain plugin) {
     this.plugin = plugin;
-    if(plugin.getConfigPreferences().getOption("DATABASE")) {
-      database = new MysqlManager(plugin);
-    } else {
-      database = new FileStats(plugin);
-    }
+    this.database = new FileStats(plugin);
     Bukkit.getScheduler().runTaskLater(plugin, this::loadStatsForPlayersOnline, 40);
   }
 

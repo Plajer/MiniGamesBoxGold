@@ -17,18 +17,10 @@
  */
 
 plugins {
-    id("plugily.projects.java-conventions")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    java
+    id 'groovy-gradle-plugin'
 }
 
-tasks {
-    build {
-        dependsOn(shadowJar)
-    }
-    shadowJar {
-        archiveClassifier.set("")
-    }
+repositories {
+    gradlePluginPortal()
 }
 
-description = "MiniGamesBox-Utils"

@@ -285,7 +285,7 @@ public class PluginMain extends JavaPlugin {
       getServer().getPluginManager().disablePlugin(this);
       return false;
     }
-    if(ServerVersion.Version.isCurrentLower(ServerVersion.Version.v1_8_R3)) {
+    /*if(ServerVersion.Version.isCurrentLower(ServerVersion.Version.v1_8_R3)) {
       MiscUtils.sendLineBreaker(getName());
       messageUtils.thisVersionIsNotSupported();
       MiscUtils.sendVersionInformation(this, getName(), getDescription());
@@ -295,7 +295,7 @@ public class PluginMain extends JavaPlugin {
       forceDisable = true;
       getServer().getPluginManager().disablePlugin(this);
       return false;
-    }
+    }*/
     return true;
   }
 
