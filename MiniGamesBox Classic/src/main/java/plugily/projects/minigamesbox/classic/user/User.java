@@ -43,7 +43,7 @@ public class User {
   private final UUID uuid;
   private boolean spectator = false;
   private boolean permanentSpectator = false;
-  private Kit kit = plugin.getKitRegistry().getDefaultKit();
+  private Kit kit;
   private final Map<StatisticType, Integer> stats = new HashMap<>();
   private final Map<String, Double> cooldowns = new HashMap<>();
 
@@ -69,6 +69,9 @@ public class User {
   }
 
   public Kit getKit() {
+    if(kit == null) {
+      return plugin.getKitRegistry().getDefaultKit();
+    }
     return kit;
   }
 

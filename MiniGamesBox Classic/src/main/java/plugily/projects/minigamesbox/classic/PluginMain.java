@@ -35,12 +35,7 @@ import plugily.projects.minigamesbox.classic.arena.PluginArenaUtils;
 import plugily.projects.minigamesbox.classic.arena.managers.BungeeManager;
 import plugily.projects.minigamesbox.classic.arena.options.ArenaOptionManager;
 import plugily.projects.minigamesbox.classic.commands.arguments.PluginArgumentsRegistry;
-import plugily.projects.minigamesbox.classic.events.ChatEvents;
-import plugily.projects.minigamesbox.classic.events.CycleEvents;
-import plugily.projects.minigamesbox.classic.events.Events;
-import plugily.projects.minigamesbox.classic.events.JoinEvent;
-import plugily.projects.minigamesbox.classic.events.LobbyEvents;
-import plugily.projects.minigamesbox.classic.events.QuitEvent;
+import plugily.projects.minigamesbox.classic.events.*;
 import plugily.projects.minigamesbox.classic.events.bungee.BungeeEvents;
 import plugily.projects.minigamesbox.classic.events.spectator.SpectatorEvents;
 import plugily.projects.minigamesbox.classic.events.spectator.SpectatorItemsManager;
@@ -63,22 +58,26 @@ import plugily.projects.minigamesbox.classic.handlers.setup.categories.PluginSet
 import plugily.projects.minigamesbox.classic.handlers.sign.SignManager;
 import plugily.projects.minigamesbox.classic.kits.KitMenuHandler;
 import plugily.projects.minigamesbox.classic.kits.KitRegistry;
+import plugily.projects.minigamesbox.classic.kits.ability.KitAbilityHandler;
+import plugily.projects.minigamesbox.classic.kits.ability.KitAbilityManager;
 import plugily.projects.minigamesbox.classic.preferences.ConfigPreferences;
 import plugily.projects.minigamesbox.classic.user.User;
 import plugily.projects.minigamesbox.classic.user.UserManager;
 import plugily.projects.minigamesbox.classic.utils.actionbar.ActionBarManager;
 import plugily.projects.minigamesbox.classic.utils.configuration.ConfigUtils;
 import plugily.projects.minigamesbox.classic.utils.dimensional.CuboidSelector;
+import plugily.projects.minigamesbox.classic.utils.engine.JavaScriptEngine;
 import plugily.projects.minigamesbox.classic.utils.helper.BukkitHelper;
 import plugily.projects.minigamesbox.classic.utils.hologram.HologramManager;
 import plugily.projects.minigamesbox.classic.utils.items.ItemManager;
 import plugily.projects.minigamesbox.classic.utils.misc.Debugger;
 import plugily.projects.minigamesbox.classic.utils.misc.MessageUtils;
 import plugily.projects.minigamesbox.classic.utils.misc.MiscUtils;
-import plugily.projects.minigamesbox.classic.utils.serialization.InventorySerializer;
 import plugily.projects.minigamesbox.classic.utils.services.ServiceRegistry;
 import plugily.projects.minigamesbox.classic.utils.services.UpdateChecker;
 import plugily.projects.minigamesbox.classic.utils.services.exception.ExceptionLogHandler;
+import plugily.projects.minigamesbox.classic.utils.services.locale.Locale;
+import plugily.projects.minigamesbox.classic.utils.services.locale.LocaleRegistry;
 import plugily.projects.minigamesbox.classic.utils.services.metrics.Metrics;
 import plugily.projects.minigamesbox.classic.utils.version.ServerVersion;
 import plugily.projects.minigamesbox.classic.utils.version.events.EventsInitializer;
@@ -108,6 +107,8 @@ public class PluginMain extends JavaPlugin {
   private UserManager userManager;
   private StatsStorage statsStorage;
   private BukkitHelper bukkitHelper;
+
+  private JavaScriptEngine javaScriptEngine;
   private CuboidSelector cuboidSelector;
   private SpecialItemManager specialItemManager;
   private RewardsFactory rewardsHandler;
@@ -129,6 +130,7 @@ public class PluginMain extends JavaPlugin {
   private KitRegistry kitRegistry;
   private MessageManager messageManager;
   private LanguageManager languageManager;
+  private KitAbilityManager kitAbilityManager;
   private PluginArgumentsRegistry argumentsRegistry;
   private PluginArenaManager arenaManager;
   private Metrics metrics;
@@ -167,9 +169,11 @@ public class PluginMain extends JavaPlugin {
       debugger.deepDebug(true);
       debugger.debug(Level.FINE, "Deep debug enabled");
       getConfig().getStringList("Performance-Listenable").forEach(debugger::monitorPerformance);
+      debugger.debug(Level.INFO, "Performance monitoring enabled: " + Arrays.toString(debugger.getListenedPerformance().toArray()));
     }
 
     setupFiles();
+    LocaleRegistry.registerLocale(new Locale("Default", "Default", "default", "Internal Plugin", Arrays.asList("default")));
 
     if(!ServiceRegistry.registerService(this)) {
       debugger.sendConsoleMsg(pluginMessagePrefix + "&cSadly, we can't connect to Plugily Projects Services. Some functions may won't work. e.g. Translations, Automatic Error Report");
@@ -218,11 +222,13 @@ public class PluginMain extends JavaPlugin {
   public void initializeDefaultClasses() {
     messageManager = new MessageManager(this);
     languageManager = new LanguageManager(this);
+    kitAbilityManager = new KitAbilityManager(this);
     MessageBuilder.init(this);
     TitleBuilder.init(this);
     languageConfig = ConfigUtils.getConfig(this, "language");
     actionBarManager = new ActionBarManager(this);
     bukkitHelper = new BukkitHelper(this);
+    javaScriptEngine = new JavaScriptEngine(this);
     partyHandler = new PartySupportInitializer().initialize(this);
     kitRegistry = new KitRegistry(this);
     User.init(this);
@@ -235,6 +241,7 @@ public class PluginMain extends JavaPlugin {
     specialItemManager = new SpecialItemManager(this);
     new SpecialItemEvent(this);
     kitMenuHandler = new KitMenuHandler(this);
+    new KitAbilityHandler(this);
     rewardsHandler = new RewardsFactory(this);
     hologramManager = new HologramManager(this);
     powerupRegistry = new PowerupRegistry(this);
@@ -264,7 +271,7 @@ public class PluginMain extends JavaPlugin {
     PluginArena.init(this);
     if(configPreferences.getOption("LEADERBOARDS")) {
       if(!new File(getDataFolder(), "internal/leaderboards_data.yml").exists()) {
-        new File(getDataFolder().getName() + "/internal").mkdir();
+        new File(getDataFolder() + "/internal").mkdir();
       }
       //running later due to plugin specific stats
       Bukkit.getScheduler().runTaskLater(this, () -> leaderboardRegistry = new LeaderboardRegistry(this), 20L * 15);
@@ -438,6 +445,10 @@ public class PluginMain extends JavaPlugin {
     return bukkitHelper;
   }
 
+  public JavaScriptEngine getJavaScriptEngine() {
+    return javaScriptEngine;
+  }
+
   public SpecialItemManager getSpecialItemManager() {
     return specialItemManager;
   }
@@ -564,5 +575,9 @@ public class PluginMain extends JavaPlugin {
 
   public Random getRandom() {
     return random;
+  }
+
+  public KitAbilityManager getKitAbilityManager() {
+    return kitAbilityManager;
   }
 }

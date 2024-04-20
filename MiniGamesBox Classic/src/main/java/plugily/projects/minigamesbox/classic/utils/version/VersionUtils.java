@@ -85,7 +85,7 @@ public final class VersionUtils {
     }
 
     if(ServerVersion.Version.isCurrentEqualOrHigher(ServerVersion.Version.v1_9_R1)) {
-      PARTICLE_VALUES = Stream.of(Particle.values()).map(Enum::toString).collect(Collectors.toList());
+      PARTICLE_VALUES = Stream.of(Particle.values()).map(Enum::toString).filter(string -> !string.contains("legacy")).collect(Collectors.toList());
     } else {
       PARTICLE_VALUES = Stream.of(XParticleLegacy.values()).map(Enum::toString).collect(Collectors.toList());
     }
@@ -288,7 +288,7 @@ public final class VersionUtils {
       return location.getBlock().getType().createBlockData();
     }
 
-    if(ServerVersion.Version.isCurrentEqualOrHigher(ServerVersion.Version.v1_13_R2) && (particle == Particle.LEGACY_BLOCK_CRACK
+    if(ServerVersion.Version.isCurrentEqualOrLower(ServerVersion.Version.v1_13_R1) && (particle == Particle.LEGACY_BLOCK_CRACK
         || particle == Particle.LEGACY_BLOCK_DUST || particle == Particle.LEGACY_FALLING_DUST)) {
       org.bukkit.Material type = location.getBlock().getType();
 
@@ -641,7 +641,11 @@ public final class VersionUtils {
     if(ServerVersion.Version.isCurrentEqualOrLower(ServerVersion.Version.v1_15_R2)) {
       return location.getWorld().spawnEntity(location, entityType);
     }
-    return location.getWorld().spawnEntity(location, entityType, CreatureSpawnEvent.SpawnReason.CUSTOM);
+    if(isPaper) {
+      return location.getWorld().spawnEntity(location, entityType, CreatureSpawnEvent.SpawnReason.CUSTOM);
+    } else {
+      return location.getWorld().spawnEntity(location, entityType, false);
+    }
   }
 
 }

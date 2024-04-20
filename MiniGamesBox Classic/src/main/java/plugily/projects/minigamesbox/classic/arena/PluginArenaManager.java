@@ -35,6 +35,8 @@ import plugily.projects.minigamesbox.classic.utils.misc.MiscUtils;
 import plugily.projects.minigamesbox.classic.utils.misc.complement.ComplementAccessor;
 import plugily.projects.minigamesbox.classic.utils.version.VersionUtils;
 
+import java.util.logging.Level;
+
 /**
  * @author Tigerpanzer_02
  * <p>
@@ -96,7 +98,9 @@ public class PluginArenaManager {
     new MessageBuilder(MessageBuilder.ActionType.JOIN).arena(arena).player(player).sendArena();
     new TitleBuilder("IN_GAME_JOIN_TITLE").asKey().arena(arena).player(player).sendPlayer();
 
-    plugin.getUserManager().getUser(player).setKit(plugin.getKitRegistry().getDefaultKit());
+    if(plugin.getConfigPreferences().getOption("KITS")) {
+      plugin.getUserManager().getUser(player).setKit(plugin.getKitRegistry().getDefaultKit());
+    }
     plugin.getSpecialItemManager().addSpecialItemsOfStage(player, SpecialItem.DisplayStage.LOBBY);
     if(arena.getArenaState() == ArenaState.WAITING_FOR_PLAYERS) {
       plugin.getSpecialItemManager().addSpecialItemsOfStage(player, SpecialItem.DisplayStage.WAITING_FOR_PLAYERS);
@@ -233,6 +237,7 @@ public class PluginArenaManager {
 
     if(arena.getArenaState() != ArenaState.WAITING_FOR_PLAYERS && arena.getArenaState() != ArenaState.STARTING && (arena.getPlayers().isEmpty() || arena.getPlayers().size() < arena.getMinimumPlayers())) {
       stopGame(true, arena);
+      arena.getPlugin().getDebugger().debug(Level.INFO, "[{0}] Game stopped due to lack of players", arena.getId());
     }
     if(!user.isSpectator()) {
       new MessageBuilder(MessageBuilder.ActionType.LEAVE).arena(arena).player(player).sendArena();
